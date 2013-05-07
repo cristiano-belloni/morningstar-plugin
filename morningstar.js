@@ -16,7 +16,7 @@ define(['require', 'kievII', 'image', 'font'], function(require, K2) {
   
     /* This gets called when all the resources are loaded */
     var pluginFunction = function (args, resources) {
-        var synth = resources[0];
+        var MorningStarSynth = resources[0];
         var blackKnobImage = resources[1];
         var whiteKnobImage = resources[2];
         var deckImage = resources[3];
