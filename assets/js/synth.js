@@ -120,13 +120,16 @@
             this.bypass = false;
         }
 
-        this.process = function(event) {
-            // Get left/right input and output arrays
-            var outputArray = [];
-            outputArray[0] = event.outputBuffer.getChannelData(0);
-            outputArray[1] = event.outputBuffer.getChannelData(1);
-            
-            this.synth.process (outputArray);
+        this.getProcess = {
+            var that = this;
+            var fn = function(event) {
+                // Get left/right input and output arrays
+                var outputArray = [];
+                outputArray[0] = event.outputBuffer.getChannelData(0);
+                outputArray[1] = event.outputBuffer.getChannelData(1);
+                that.synth.process (outputArray);
+            }
+            return fn;
         }
 
         this.init = function (context, destination) {
@@ -139,7 +142,7 @@
             this.synth.init(this.context.sampleRate);
 
             this.source = this.context.createJavaScriptNode(this.nSamples);
-            this.source.onaudioprocess = this.process;
+            this.source.onaudioprocess = this.getProcess();
 
             this.gainNode = this.context.createGainNode();
         	this.source.connect(this.gainNode);
