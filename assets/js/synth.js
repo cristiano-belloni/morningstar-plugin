@@ -121,7 +121,7 @@
         this.bypass = false;
     }
 
-    MorningStarSynth.prototype.process = function(event) {
+    MorningStarSynth.process = function(event) {
         // Get left/right input and output arrays
         var outputArray = [];
         outputArray[0] = event.outputBuffer.getChannelData(0);
@@ -130,7 +130,7 @@
         MorningStarSynth.synth.process (outputArray);
     }
 
-    MorningStarSynth.prototype.init = function (context, destination) {
+    MorningStarSynth.init = function (context, destination) {
      
         this.nSamples = 2048;
         this.wsCurve = new Float32Array(this.nSamples);
@@ -149,7 +149,7 @@
         
     };
 
-    MorningStarSynth.prototype.noteOn = function (noteNum, velocity) {
+    MorningStarSynth.noteOn = function (noteNum, velocity) {
         console.log("note received is ", noteNum);
         if(MorningStarSynth.synth.noteson === 0) {
             MorningStarSynth.synth.freq = MorningStarSynth.synth.tfreq = 440 * Math.pow(2, (noteNum) / 12);
@@ -165,7 +165,7 @@
         MorningStarSynth.synth.noteson += 1;
     }
 
-    MorningStarSynth.prototype.noteOff = function (noteNum) {
+    MorningStarSynth.noteOff = function (noteNum) {
         MorningStarSynth.synth.noteson -= 1;
         if (MorningStarSynth.synth.noteson < 0) {
             MorningStarSynth.synth.noteson = 0;
@@ -174,61 +174,61 @@
 
     // Setters
 
-    MorningStarSynth.prototype.setCutoff = function (cutoffValue) {
+    MorningStarSynth.setCutoff = function (cutoffValue) {
         MorningStarSynth.synth.cutoff = cutoffValue;
     }
 
-    MorningStarSynth.prototype.setResonance = function (resValue) {
+    MorningStarSynth.setResonance = function (resValue) {
         MorningStarSynth.synth.resonance = resValue;
     }
 
-    MorningStarSynth.prototype.setPortamento = function (portValue) {
+    MorningStarSynth.setPortamento = function (portValue) {
         MorningStarSynth.synth.portamento = portValue;
     }
 
-    MorningStarSynth.prototype.setRelease = function (relValue) {
+    MorningStarSynth.setRelease = function (relValue) {
         MorningStarSynth.synth.release = relValue;
     }
 
-    MorningStarSynth.prototype.setEnvelope = function (envValue) {
+    MorningStarSynth.setEnvelope = function (envValue) {
         MorningStarSynth.synth.envmod = envValue;
     }
 
-    MorningStarSynth.prototype.setVolume = function (volValue) {
+    MorningStarSynth.setVolume = function (volValue) {
         this.gainNode.gain.value = volValue;
     }
 
-    MorningStarSynth.prototype.setBypass = function (bypassON) {
+    MorningStarSynth.setBypass = function (bypassON) {
         MorningStarSynth.synth.bypass = bypassON;
     }
 
     //Getters
 
-    MorningStarSynth.prototype.getCutoff = function () {
+    MorningStarSynth.getCutoff = function () {
         return MorningStarSynth.synth.cutoff;
     }
 
-    MorningStarSynth.prototype.getResonance = function () {
+    MorningStarSynth.getResonance = function () {
         return MorningStarSynth.synth.resonance;
     }
 
-    MorningStarSynth.prototype.getPortamento = function () {
+    MorningStarSynth.getPortamento = function () {
         return MorningStarSynth.synth.portamento;
     }
 
-    MorningStarSynth.prototype.getRelease = function () {
+    MorningStarSynth.getRelease = function () {
         return MorningStarSynth.synth.release;
     }
 
-    MorningStarSynth.prototype.getEnvelope = function () {
+    MorningStarSynth.getEnvelope = function () {
         return MorningStarSynth.synth.envmod;
     }
 
-    MorningStarSynth.prototype.getVolume = function () {
+    MorningStarSynth.getVolume = function () {
         return this.gainNode.gain.value;
     }
 
-    MorningStarSynth.prototype.getBypass = function () {
+    MorningStarSynth.getBypass = function () {
         return MorningStarSynth.synth.bypass;
     }
 
