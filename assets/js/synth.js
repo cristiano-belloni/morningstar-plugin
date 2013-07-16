@@ -1,242 +1,243 @@
 (function (window) {
 
-    function MorningStarSynth() {
-    }
+    function MorningStarSynth() { 
 
-    MorningStarSynth.synth = {
-        phase : 0,
-        freq : 440,
-        tfreq : 440,
-        amp : 0,
-        env : 0,
-        fcutoff : 0,
-        fspeed : 0,
-        fpos : 0,
-        freso: 0,
-        lastsample : 0,
-        /* int */          noteson : 0,
-        /* unsigned int */ vel : 0,
-        /* unsigned int */ cdelay : 0,
-        /* unsigned int */ release : 100,
-        /* unsigned int */ cutoff : 50,
-        /* unsigned int */ envmod : 80,
-        /* unsigned int */ resonance : 100,
-        /* unsigned int */ volume : 100,
-        /* unsigned int */ portamento : 64,
-    };
+        this.synth = {
+            phase : 0,
+            freq : 440,
+            tfreq : 440,
+            amp : 0,
+            env : 0,
+            fcutoff : 0,
+            fspeed : 0,
+            fpos : 0,
+            freso: 0,
+            lastsample : 0,
+            /* int */          noteson : 0,
+            /* unsigned int */ vel : 0,
+            /* unsigned int */ cdelay : 0,
+            /* unsigned int */ release : 100,
+            /* unsigned int */ cutoff : 50,
+            /* unsigned int */ envmod : 80,
+            /* unsigned int */ resonance : 100,
+            /* unsigned int */ volume : 100,
+            /* unsigned int */ portamento : 64,
+        };
 
-    MorningStarSynth.synth.tanh = function (arg) {
-        return (Math.exp(2 * arg) - 1) / (Math.exp(2 * arg) + 1);
-    }
+        this.synth.tanh = function (arg) {
+            return (Math.exp(2 * arg) - 1) / (Math.exp(2 * arg) + 1);
+        }
 
-    MorningStarSynth.synth.process = function (data) {
+        this.synth.process = function (data) {
 
-    var /*int*/ i;
+        var /*int*/ i;
 
-    // Upmix to stereo if given two channels (array of arrays). Could be implemented
-    // more elegantly.
-    var len = data.length;
-    if (len == 2) len = data[0].length;
+        // Upmix to stereo if given two channels (array of arrays). Could be implemented
+        // more elegantly.
+        var len = data.length;
+        if (len == 2) len = data[0].length;
 
-        if (this.bypass === false) {
-            for( i = 0; i < len; i+=1) {
-                if(this.cdelay <= 0) {
+            if (this.bypass === false) {
+                for( i = 0; i < len; i+=1) {
+                    if(this.cdelay <= 0) {
 
-                    this.freq = ((this.portamento / 127) * 0.9) * this.freq + (1 - ((this.portamento / 127) * 0.9)) * this.tfreq;
+                        this.freq = ((this.portamento / 127) * 0.9) * this.freq + (1 - ((this.portamento / 127) * 0.9)) * this.tfreq;
 
-                    if(this.noteson > 0) {
-                        this.amp *= 0.99;
+                        if(this.noteson > 0) {
+                            this.amp *= 0.99;
+                        }
+                        else {
+                            this.amp *= 0.5;
+                        }
+
+                        this.env *= 0.8 + Math.pow (this.release / 127, 0.25) / 5.1;
+                        this.fcutoff = Math.pow (this.cutoff / 127, 2) + Math.pow (this.env, 2) * Math.pow (this.envmod / 127, 2);
+                        this.fcutoff = this.tanh(this.fcutoff);
+                        this.freso = Math.pow (this.resonance / 130, 0.25);
+                        this.cdelay = Math.floor(this.sampleRate / 100);
+                    }
+                    this.cdelay--;
+
+                    this.max = this.sampleRate / this.freq;
+                    this.sample = (this.phase / this.max) * (this.phase / this.max) - 0.25;
+                    this.phase++;
+                    if( this.phase >= this.max )
+                    this.phase -= this.max;
+
+                    if (this.vel > 100) {
+                        this.sample *= this.env;
                     }
                     else {
-                        this.amp *= 0.5;
+                        this.sample *= this.amp;
                     }
 
-                    this.env *= 0.8 + Math.pow (this.release / 127, 0.25) / 5.1;
-                    this.fcutoff = Math.pow (this.cutoff / 127, 2) + Math.pow (this.env, 2) * Math.pow (this.envmod / 127, 2);
-                    this.fcutoff = this.tanh(this.fcutoff);
-                    this.freso = Math.pow (this.resonance / 130, 0.25);
-                    this.cdelay = Math.floor(this.sampleRate / 100);
-                }
-                this.cdelay--;
+                    this.fpos += this.fspeed;
+                    this.fspeed *= this.freso;
+                    this.fspeed += (this.sample - this.fpos) * this.fcutoff;
+                    this.sample = this.fpos;
 
-                this.max = this.sampleRate / this.freq;
-                this.sample = (this.phase / this.max) * (this.phase / this.max) - 0.25;
-                this.phase++;
-                if( this.phase >= this.max )
-                this.phase -= this.max;
-
-                if (this.vel > 100) {
-                    this.sample *= this.env;
+                    this.sample = this.sample * 0.5 + this.lastsample * 0.5;
+                    this.lastsample = this.sample;
+                    
+                    // Velocity control does nothing, had to use it as a gain here.
+                    var curr_sample = this.sample * (this.volume / 127) * (this.vel / 127) ;
+                    
+                    // Upmix to stereo if given two channels (array of arrays)
+                    if (data.length === 2) {
+                        data[0][i] = 0.707 * curr_sample;
+                        data[1][i] = 0.707 * curr_sample;
+                    }
+                    
+                    // Mono if given only one channel (array)
+                    else {
+                        data[i] = curr_sample; 
+                    }
+                    
                 }
-                else {
-                    this.sample *= this.amp;
-                }
-
-                this.fpos += this.fspeed;
-                this.fspeed *= this.freso;
-                this.fspeed += (this.sample - this.fpos) * this.fcutoff;
-                this.sample = this.fpos;
-
-                this.sample = this.sample * 0.5 + this.lastsample * 0.5;
-                this.lastsample = this.sample;
-                
-                // Velocity control does nothing, had to use it as a gain here.
-                var curr_sample = this.sample * (this.volume / 127) * (this.vel / 127) ;
-                
-                // Upmix to stereo if given two channels (array of arrays)
-                if (data.length === 2) {
-                    data[0][i] = 0.707 * curr_sample;
-                    data[1][i] = 0.707 * curr_sample;
-                }
-                
-                // Mono if given only one channel (array)
-                else {
-                    data[i] = curr_sample; 
-                }
-                
             }
         }
-    }
 
-    MorningStarSynth.synth.init = function (sampleRate) {
-        this.sampleRate = sampleRate;
-        this.phase = 0;
-        this.freq = 440;
-        this.tfreq = 440;
-        this.amp = 0;
-        this.fcutoff = 0;
-        this.fspeed = 0;
-        this.fpos = 0;
-        this.lastsample = 0;
-        this.noteson = 0;
-        this.cdelay = Math.floor(sampleRate / 100);
+        this.synth.init = function (sampleRate) {
+            this.sampleRate = sampleRate;
+            this.phase = 0;
+            this.freq = 440;
+            this.tfreq = 440;
+            this.amp = 0;
+            this.fcutoff = 0;
+            this.fspeed = 0;
+            this.fpos = 0;
+            this.lastsample = 0;
+            this.noteson = 0;
+            this.cdelay = Math.floor(sampleRate / 100);
 
-        /* These are to be set externally */
-        this.release = 100;
-        this.cutoff = 50;
-        this.envmod = 80;
-        this.resonance = 100;
-        this.volume = 100;
-        this.portamento = 64;
-        this.bypass = false;
-    }
-
-    MorningStarSynth.process = function(event) {
-        // Get left/right input and output arrays
-        var outputArray = [];
-        outputArray[0] = event.outputBuffer.getChannelData(0);
-        outputArray[1] = event.outputBuffer.getChannelData(1);
-        
-        MorningStarSynth.synth.process (outputArray);
-    }
-
-    MorningStarSynth.init = function (context, destination) {
-     
-        this.nSamples = 2048;
-        this.wsCurve = new Float32Array(this.nSamples);
-
-        this.context = context;
-
-        MorningStarSynth.synth.init(this.context.sampleRate);
-
-        this.source = this.context.createJavaScriptNode(this.nSamples);
-        this.source.onaudioprocess = this.process;
-
-        this.gainNode = this.context.createGainNode();
-    	this.source.connect(this.gainNode);
-        this.gainNode.connect(destination);
-
-        
-    };
-
-    MorningStarSynth.noteOn = function (noteNum, velocity) {
-        console.log("note received is ", noteNum);
-        if(MorningStarSynth.synth.noteson === 0) {
-            MorningStarSynth.synth.freq = MorningStarSynth.synth.tfreq = 440 * Math.pow(2, (noteNum) / 12);
-            MorningStarSynth.synth.amp = 1;
-            MorningStarSynth.synth.vel = velocity;
-            MorningStarSynth.synth.env = MorningStarSynth.synth.vel / 127;
-            MorningStarSynth.synth.cdelay = 0;
+            /* These are to be set externally */
+            this.release = 100;
+            this.cutoff = 50;
+            this.envmod = 80;
+            this.resonance = 100;
+            this.volume = 100;
+            this.portamento = 64;
+            this.bypass = false;
         }
 
-        else {
-            MorningStarSynth.synth.tfreq = 440.0 * Math.pow (2, (noteNum) / 12);
+        this.process = function(event) {
+            // Get left/right input and output arrays
+            var outputArray = [];
+            outputArray[0] = event.outputBuffer.getChannelData(0);
+            outputArray[1] = event.outputBuffer.getChannelData(1);
+            
+            this.synth.process (outputArray);
         }
-        MorningStarSynth.synth.noteson += 1;
-    }
 
-    MorningStarSynth.noteOff = function (noteNum) {
-        MorningStarSynth.synth.noteson -= 1;
-        if (MorningStarSynth.synth.noteson < 0) {
-            MorningStarSynth.synth.noteson = 0;
+        this.init = function (context, destination) {
+         
+            this.nSamples = 2048;
+            this.wsCurve = new Float32Array(this.nSamples);
+
+            this.context = context;
+
+            this.synth.init(this.context.sampleRate);
+
+            this.source = this.context.createJavaScriptNode(this.nSamples);
+            this.source.onaudioprocess = this.process;
+
+            this.gainNode = this.context.createGainNode();
+        	this.source.connect(this.gainNode);
+            this.gainNode.connect(destination);
+
+            
+        };
+
+        this.noteOn = function (noteNum, velocity) {
+            console.log("note received is ", noteNum);
+            if(this.synth.noteson === 0) {
+                this.synth.freq = this.synth.tfreq = 440 * Math.pow(2, (noteNum) / 12);
+                this.synth.amp = 1;
+                this.synth.vel = velocity;
+                this.synth.env = this.synth.vel / 127;
+                this.synth.cdelay = 0;
+            }
+
+            else {
+                this.synth.tfreq = 440.0 * Math.pow (2, (noteNum) / 12);
+            }
+            this.synth.noteson += 1;
         }
-    }
 
-    // Setters
+        this.noteOff = function (noteNum) {
+            this.synth.noteson -= 1;
+            if (this.synth.noteson < 0) {
+                this.synth.noteson = 0;
+            }
+        }
 
-    MorningStarSynth.setCutoff = function (cutoffValue) {
-        MorningStarSynth.synth.cutoff = cutoffValue;
-    }
+        // Setters
 
-    MorningStarSynth.setResonance = function (resValue) {
-        MorningStarSynth.synth.resonance = resValue;
-    }
+        this.setCutoff = function (cutoffValue) {
+            this.synth.cutoff = cutoffValue;
+        }
 
-    MorningStarSynth.setPortamento = function (portValue) {
-        MorningStarSynth.synth.portamento = portValue;
-    }
+        this.setResonance = function (resValue) {
+            this.synth.resonance = resValue;
+        }
 
-    MorningStarSynth.setRelease = function (relValue) {
-        MorningStarSynth.synth.release = relValue;
-    }
+        this.setPortamento = function (portValue) {
+            this.synth.portamento = portValue;
+        }
 
-    MorningStarSynth.setEnvelope = function (envValue) {
-        MorningStarSynth.synth.envmod = envValue;
-    }
+        this.setRelease = function (relValue) {
+            this.synth.release = relValue;
+        }
 
-    MorningStarSynth.setVolume = function (volValue) {
-        this.gainNode.gain.value = volValue;
-    }
+        this.setEnvelope = function (envValue) {
+            this.synth.envmod = envValue;
+        }
 
-    MorningStarSynth.setBypass = function (bypassON) {
-        MorningStarSynth.synth.bypass = bypassON;
-    }
+        this.setVolume = function (volValue) {
+            this.gainNode.gain.value = volValue;
+        }
 
-    //Getters
+        this.setBypass = function (bypassON) {
+            this.synth.bypass = bypassON;
+        }
 
-    MorningStarSynth.getCutoff = function () {
-        return MorningStarSynth.synth.cutoff;
-    }
+        //Getters
 
-    MorningStarSynth.getResonance = function () {
-        return MorningStarSynth.synth.resonance;
-    }
+        this.getCutoff = function () {
+            return this.synth.cutoff;
+        }
 
-    MorningStarSynth.getPortamento = function () {
-        return MorningStarSynth.synth.portamento;
-    }
+        this.getResonance = function () {
+            return this.synth.resonance;
+        }
 
-    MorningStarSynth.getRelease = function () {
-        return MorningStarSynth.synth.release;
-    }
+        this.getPortamento = function () {
+            return this.synth.portamento;
+        }
 
-    MorningStarSynth.getEnvelope = function () {
-        return MorningStarSynth.synth.envmod;
-    }
+        this.getRelease = function () {
+            return this.synth.release;
+        }
 
-    MorningStarSynth.getVolume = function () {
-        return this.gainNode.gain.value;
-    }
+        this.getEnvelope = function () {
+            return this.synth.envmod;
+        }
 
-    MorningStarSynth.getBypass = function () {
-        return MorningStarSynth.synth.bypass;
+        this.getVolume = function () {
+            return this.gainNode.gain.value;
+        }
+
+        this.getBypass = function () {
+            return this.synth.bypass;
+        }
+
     }
 
     if (typeof define === "function" && define.amd) {
-      console.log ("AMD detected, setting define");  
-      define([], function() {
-        return MorningStarSynth;
-      });
+        console.log ("AMD detected, setting define");  
+        define([], function() {
+            return MorningStarSynth;
+        });
     }
     else {
         window.MorningStarSynth = MorningStarSynth;
