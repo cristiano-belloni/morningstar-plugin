@@ -120,7 +120,7 @@
             this.bypass = false;
         }
 
-        this.getProcess = {
+        this.getProcess = function () {
             var that = this;
             var fn = function(event) {
                 // Get left/right input and output arrays
