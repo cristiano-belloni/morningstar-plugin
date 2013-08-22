@@ -27,13 +27,27 @@ define(['require', 'kievII', 'image', 'font'], function(require, K2) {
         
         this.name = args.name;
         this.id = args.id;
+
+        if (args.initialState && args.initialState.data) {
+            /* Load data */
+            this.pluginState = args.initialState.data;    
+        }
+        else {
+            /* Use default data */
+            this.pluginState = {
+                envelope: 0.6,
+                release: 0.75,
+                cutoff: 0.4,
+                resonance: 0.75,
+                volume: 1,
+                velocity: 1
+            };
+        }
         
         // The sound part
         this.audioDestination = args.audioDestinations[0];
         this.context = args.audioContext;
         var context = this.context;
-		
-		this.velocity = 1;
 		
         this.MSS = new MorningStarSynth();
         this.MSS.init(context, this.audioDestination);
@@ -144,12 +158,12 @@ define(['require', 'kievII', 'image', 'font'], function(require, K2) {
                 this.ui.addElement(new K2.Button(blackKeyArgs), {zIndex: 10});
             }
             
-        this.knobDescription = [ {id: 'envelope', init: K2.MathUtils.linearRange (0, 127, 0, 1, this.MSS.getEnvelope()), type: 'white'},
-                                 {id: 'release', init: K2.MathUtils.linearRange (0, 127, 0, 1, this.MSS.getRelease()), type: 'white'},
-                                 {id: 'cutoff', init: K2.MathUtils.linearRange (0, 127, 0, 1, this.MSS.getCutoff()), type: 'white'},
-                                 {id: 'resonance', init: K2.MathUtils.linearRange (0, 127, 0, 1, this.MSS.getResonance()), type: 'white'},
-                                 {id: 'velocity', init: this.velocity, type: 'black'},
-                                 {id: 'volume', init: this.MSS.getVolume(), type: 'black'}
+        this.knobDescription = [ {id: 'envelope', init: this.pluginState.envelope, type: 'white'},
+                                 {id: 'release', init: this.pluginState.release, type: 'white'},
+                                 {id: 'cutoff', init: this.pluginState.cutoff, type: 'white'},
+                                 {id: 'resonance', init: this.pluginState.resonance, type: 'white'},
+                                 {id: 'velocity', init: this.pluginState.velocity, type: 'black'},
+                                 {id: 'volume', init: this.pluginState.volume, type: 'black'}
                               ];
         /* KNOB INIT */
        var knobArgs = {
@@ -163,6 +177,7 @@ define(['require', 'kievII', 'image', 'font'], function(require, K2) {
             stopAngValue: 501,
             onValueSet: function (slot, value, element) {
 				switch (element) {
+                    this.pluginState[element] = value;
 					case 'volume':
 						this.MSS.setVolume(value);
 						this.ui.setValue({elementID: "statusLabel", value: "Volume: " + Math.round(value * 127)});
@@ -230,6 +245,10 @@ define(['require', 'kievII', 'image', 'font'], function(require, K2) {
         this.ui.setValue({elementID: "statusLabel", value: "MorningStar ready."});    
         this.ui.refresh();
 
+        this.saveState = function () {
+            return { data: this.pluginState };
+        };
+
         // Initialization made it so far: plugin is ready.
         args.hostInterface.setInstanceStatus ('ready');
         
@@ -266,9 +285,7 @@ define(['require', 'kievII', 'image', 'font'], function(require, K2) {
                 requireErr (err);
             }
         );
-            
 
-        
     };
     
     return {
