@@ -176,8 +176,8 @@ define(['require', 'kievII', 'image', 'font'], function(require, K2) {
             startAngValue: 218,
             stopAngValue: 501,
             onValueSet: function (slot, value, element) {
+                this.pluginState[element] = value;
 				switch (element) {
-                    this.pluginState[element] = value;
 					case 'volume':
 						this.MSS.setVolume(value);
 						this.ui.setValue({elementID: "statusLabel", value: "Volume: " + Math.round(value * 127)});
