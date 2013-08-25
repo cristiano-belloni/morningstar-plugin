@@ -1,4 +1,5 @@
-define(['require', 'kievII', 'image', 'font'], function(require, K2) {
+define(['require',
+        'github:janesconference/KievII@v0.5.0-jspm/dist/kievII'], function(require, K2) {
     
     /* This gets returned to the host as soon as the plugin is loaded */ 
     var pluginConf = {
@@ -268,17 +269,17 @@ define(['require', 'kievII', 'image', 'font'], function(require, K2) {
         }.bind(this);
 
         var resList = [ './assets/js/synth.js',
-                        'image!./assets/images/bknob.png!rel',
-                        'image!./assets/images/wknob.png!rel',
-                        'image!./assets/images/msdeck.png!rel',
-                        'image!./assets/images/keyblack.png!rel',
-                        'image!./assets/images/keywhite.png!rel',
-                        'image!./assets/images/keyblack_down.png!rel',
-                        'image!./assets/images/keywhite_down.png!rel',
-                        'font!google,families:[VT323]'];
+                        './assets/images/bknob.png!image',
+                        './assets/images/wknob.png!image',
+                        './assets/images/msdeck.png!image',
+                        './assets/images/keyblack.png!image',
+                        './assets/images/keywhite.png!image',
+                        './assets/images/keyblack_down.png!image',
+                        './assets/images/keywhite_down.png!image',
+                        '#google VT323 !font'];
 
         require (resList,
-            function (/*synth*/) {
+            function () {
                 var resources = arguments;
                 pluginFunction.call (this, args, resources);
             }.bind(this),
