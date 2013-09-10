@@ -251,6 +251,16 @@ define(['require',
         };
         args.hostInterface.setSaveState (saveState);
 
+        var onMIDIMessage = function (message) {
+            if (message.type === 'noteon') {
+                this.MSS.noteOn(message., this.velocity);
+
+            }
+            if (message.type === 'noteoff') {
+                this.MSS.noteOff();
+            }
+        }
+
         // Initialization made it so far: plugin is ready.
         args.hostInterface.setInstanceStatus ('ready');
         
