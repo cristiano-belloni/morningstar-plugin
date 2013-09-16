@@ -249,7 +249,7 @@ define(['require',
         var saveState = function () {
             return { data: this.pluginState };
         };
-        args.hostInterface.setSaveState (saveState.bind (this));
+        args.MIDIHandler.setSaveState (saveState.bind (this));
 
         var onMIDIMessage = function (message) {
             if (message.type === 'noteon') {
