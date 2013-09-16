@@ -249,7 +249,7 @@ define(['require',
         var saveState = function () {
             return { data: this.pluginState };
         };
-        args.MIDIHandler.setSaveState (saveState.bind (this));
+        args.hostInterface.setSaveState (saveState.bind (this));
 
         var onMIDIMessage = function (message) {
             if (message.type === 'noteon') {
@@ -261,7 +261,7 @@ define(['require',
             }
         };
 
-        args.hostInterface.setMIDICallback (onMIDIMessage. bind (this));
+        args.MIDIHandler.setMIDICallback (onMIDIMessage. bind (this));
 
         // Initialization made it so far: plugin is ready.
         args.hostInterface.setInstanceStatus ('ready');
