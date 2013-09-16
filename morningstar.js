@@ -249,7 +249,7 @@ define(['require',
         var saveState = function () {
             return { data: this.pluginState };
         };
-        args.hostInterface.setSaveState (saveState);
+        args.hostInterface.setSaveState (saveState.bind (this));
 
         var onMIDIMessage = function (message) {
             if (message.type === 'noteon') {
@@ -259,7 +259,9 @@ define(['require',
             if (message.type === 'noteoff') {
                 this.MSS.noteOff();
             }
-        }
+        };
+
+        args.hostInterface.setMIDICallback (onMIDIMessage. bind (this));
 
         // Initialization made it so far: plugin is ready.
         args.hostInterface.setInstanceStatus ('ready');
