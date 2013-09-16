@@ -253,7 +253,7 @@ define(['require',
 
         var onMIDIMessage = function (message) {
             if (message.type === 'noteon') {
-                this.MSS.noteOn(message., this.velocity);
+                this.MSS.noteOn(message.pitch, message.velocity);
 
             }
             if (message.type === 'noteoff') {
