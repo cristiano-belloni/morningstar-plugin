@@ -1,5 +1,5 @@
 define(['require',
-        'github:janesconference/KievII@jspm0.5/dist/kievII'], function(require, K2) {
+        'github:janesconference/KievII@0.6.0/kievII'], function(require, K2) {
     
     /* This gets returned to the host as soon as the plugin is loaded */ 
     var pluginConf = {
