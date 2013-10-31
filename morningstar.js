@@ -275,9 +275,7 @@ define(['require',
         var args = initArgs;
 
         var requireErr = function (err) {
-            var failedId = err.requireModules && err.requireModules[0];
-            requirejs.undef(failedId);
-            args.hostInterface.setInstanceStatus ('fatal', {description: 'Error initializing plugin: ' + failedId});
+            args.hostInterface.setInstanceStatus ('fatal', {description: 'Error loading plugin resources'});
         }.bind(this);
 
         var resList = [ './assets/js/synth.js',
