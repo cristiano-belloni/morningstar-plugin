@@ -278,7 +278,7 @@ define(['require',
             args.hostInterface.setInstanceStatus ('fatal', {description: 'Error loading plugin resources'});
         }.bind(this);
 
-        var resList = [ './assets/js/synth.js',
+        var resList = [ './assets/js/synth',
                         './assets/images/bknob.png!image',
                         './assets/images/wknob.png!image',
                         './assets/images/msdeck.png!image',
