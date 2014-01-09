@@ -13,7 +13,7 @@ define(['require',
             width: 657,
             height: 450
         }
-    }
+    };
   
     /* This gets called when all the resources are loaded */
     var pluginFunction = function (args, resources) {
@@ -31,7 +31,7 @@ define(['require',
 
         if (args.initialState && args.initialState.data) {
             /* Load data */
-            this.pluginState = args.initialState.data;    
+            this.pluginState = args.initialState.data;   
         }
         else {
             /* Use default data */
@@ -219,7 +219,7 @@ define(['require',
         var whiteTop = 34;
         var blackTop = 180;
         
-        for (var i = 0; i < this.knobDescription.length; i+=1) {
+        for (i = 0; i < this.knobDescription.length; i+=1) {
             var currKnob = this.knobDescription[i];
             
             knobArgs.ID = currKnob.id;
@@ -238,8 +238,9 @@ define(['require',
             this.ui.addElement(new K2.RotKnob(knobArgs));
             var initValue = currKnob.init;
             this.ui.setValue ({elementID: knobArgs.ID, value: initValue});
-        }    
-        this.ui.setValue({elementID: "statusLabel", value: "MorningStar ready."});    
+        }
+
+        this.ui.setValue({elementID: "statusLabel", value: "MorningStar ready."});
         this.ui.refresh();
 
         var saveState = function () {
@@ -247,13 +248,24 @@ define(['require',
         };
         args.hostInterface.setSaveState (saveState.bind (this));
 
-        var onMIDIMessage = function (message) {
+        var onMIDIMessage = function (message, when) {
             if (message.type === 'noteon') {
-                this.MSS.noteOn(message.pitch, message.velocity);
-
+                if (!when) {
+                    this.MSS.noteOn(message.pitch, message.velocity);
+                }
+                else {
+                    console.log ("arrived on message: when / now", when, this.context.currentTime);
+                    this.MSS.noteOnDeferred(message.pitch, message.velocity, when);
+                }
             }
             if (message.type === 'noteoff') {
-                this.MSS.noteOff();
+                if (!when) {
+                    this.MSS.noteOff();
+                }
+                else {
+                    console.log ("arrived off message: when / now", when, this.context.currentTime);
+                    this.MSS.noteOffDeferred(when);
+                }
             }
         };
 
@@ -262,11 +274,11 @@ define(['require',
         // Initialization made it so far: plugin is ready.
         args.hostInterface.setInstanceStatus ('ready');
         
-  	};
+    };
   
   
     /* This function gets called by the host every time an instance of
-       the plugin is requested [e.g: displayed on screen] */        
+       the plugin is requested [e.g: displayed on screen] */
     var initPlugin = function(initArgs) {
         var args = initArgs;
 

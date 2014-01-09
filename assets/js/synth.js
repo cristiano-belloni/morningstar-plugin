@@ -30,8 +30,36 @@
             return (Math.exp(2 * arg) - 1) / (Math.exp(2 * arg) + 1);
         };
 
-        this.synth.scheduleEvent = function (event, when) {
-            this.events[when] = event;
+        this.synth.handleEvent = function (event) {
+            console.log ("Handling event", event);
+            // Apply the scheduled event.
+            switch (event.type) {
+                case "note-on":
+                console.log ("note-on");
+                    if(this.noteson === 0) {
+                        this.freq = this.tfreq = event.tfreq;
+                        this.amp = event.amp;
+                        this.vel = event.vel;
+                        this.env = event.env;
+                        this.cdelay = event.cdelay;
+                    }
+
+                    else {
+                        this.tfreq = event.tfreq;
+                    }
+
+                    this.noteson += 1;
+                    break;
+
+                case "note-off":
+                console.log ("note-off");
+                    this.noteson -= 1;
+                    if (this.noteson < 0) {
+                        this.noteson = 0;
+                    }
+                    break;
+            }
+            
         };
 
         this.synth.consumeEvent = function (now) {
@@ -50,16 +78,16 @@
         if (len == 2) len = data[0].length;
 
             if (this.bypass === false) {
-
-                console.log ("***time now is", time);
-                //var event = this.consumeEvent(time);
-
-
-                if (event) {
-                    /* TODO HANDLE EVENT */
-                }
-
+   
                 for( i = 0; i < len; i+=1) {
+
+                    var timePlusSample = time + i;
+                    var event = this.consumeEvent(timePlusSample);
+
+                    if (event) {
+                        this.handleEvent(event);
+                    }
+
                     if(this.cdelay <= 0) {
 
                         this.freq = ((this.portamento / 127) * 0.9) * this.freq + (1 - ((this.portamento / 127) * 0.9)) * this.tfreq;
@@ -148,7 +176,7 @@
                 var outputArray = [];
                 outputArray[0] = event.outputBuffer.getChannelData(0);
                 outputArray[1] = event.outputBuffer.getChannelData(1);
-                that.synth.process (outputArray, event.playBackTime);
+                that.synth.process (outputArray, Math.round(event.target.context.currentTime * that.synth.sampleRate));
             };
             return fn;
         };
@@ -188,77 +216,106 @@
             this.synth.noteson += 1;
         };
 
-        this.noteOff = function (noteNum) {
+        this.noteOff = function () {
             this.synth.noteson -= 1;
             if (this.synth.noteson < 0) {
                 this.synth.noteson = 0;
             }
         };
 
+        this.noteOnDeferred = function (noteNum, velocity, when) {
+            
+            var event = {
+                type: "note-on",
+                amp: 1,
+                vel: velocity,
+                env: this.synth.vel / 127,
+                cdelay: 0,
+                tfreq: 440.0 * Math.pow (2, (noteNum) / 12)
+            };
+
+            var sampleWhen = Math.round(when * this.synth.sampleRate);
+            this.synth.events[sampleWhen] = event;
+
+            console.log ("Scheduled on event at", sampleWhen, this.synth.events);
+        };
+
+        this.noteOffDeferred = function (when) {
+
+            var event = {
+                type: "note-off"
+            };
+
+            var sampleWhen = Math.round(when * this.synth.sampleRate);
+            this.synth.events[sampleWhen] = event;
+
+            console.log ("Scheduled off event at", sampleWhen, this.synth.events);
+
+        };
+
         // Setters
 
         this.setCutoff = function (cutoffValue) {
             this.synth.cutoff = cutoffValue;
-        }
+        };
 
         this.setResonance = function (resValue) {
             this.synth.resonance = resValue;
-        }
+        };
 
         this.setPortamento = function (portValue) {
             this.synth.portamento = portValue;
-        }
+        };
 
         this.setRelease = function (relValue) {
             this.synth.release = relValue;
-        }
+        };
 
         this.setEnvelope = function (envValue) {
             this.synth.envmod = envValue;
-        }
+        };
 
         this.setVolume = function (volValue) {
             this.gainNode.gain.value = volValue;
-        }
+        };
 
         this.setBypass = function (bypassON) {
             this.synth.bypass = bypassON;
-        }
+        };
 
         //Getters
 
         this.getCutoff = function () {
             return this.synth.cutoff;
-        }
+        };
 
         this.getResonance = function () {
             return this.synth.resonance;
-        }
+        };
 
         this.getPortamento = function () {
             return this.synth.portamento;
-        }
+        };
 
         this.getRelease = function () {
             return this.synth.release;
-        }
+        };
 
         this.getEnvelope = function () {
             return this.synth.envmod;
-        }
+        };
 
         this.getVolume = function () {
             return this.gainNode.gain.value;
-        }
+        };
 
         this.getBypass = function () {
             return this.synth.bypass;
-        }
+        };
 
     }
 
     if (typeof define === "function" && define.amd) {
-        console.log ("AMD detected, setting define");  
         define([], function() {
             return MorningStarSynth;
         });
