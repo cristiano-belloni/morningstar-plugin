@@ -1,7 +1,7 @@
 define(['require',
         'github:janesconference/KievII@0.6.0/kievII'], function(require, K2) {
     
-    /* This gets returned to the host as soon as the plugin is loaded */ 
+    /* This gets returned to the host as soon as the plugin is loaded */
     var pluginConf = {
         name: "MorningStar",
         osc: false,
@@ -31,7 +31,7 @@ define(['require',
 
         if (args.initialState && args.initialState.data) {
             /* Load data */
-            this.pluginState = args.initialState.data;   
+            this.pluginState = args.initialState.data;  
         }
         else {
             /* Use default data */
@@ -254,7 +254,11 @@ define(['require',
                     this.MSS.noteOn(message.pitch, message.velocity);
                 }
                 else {
-                    console.log ("arrived on message: when / now", when, this.context.currentTime);
+                    var now = this.context.currentTime;
+                    console.log ("arrived on message: when / now", when, now);
+                    if (when < now) {
+                        console.log ("MORNINGSTAR: ******** OUT OF TIME ON MESSAGE");
+                    }
                     this.MSS.noteOnDeferred(message.pitch, message.velocity, when);
                 }
             }
@@ -263,7 +267,10 @@ define(['require',
                     this.MSS.noteOff();
                 }
                 else {
-                    console.log ("arrived off message: when / now", when, this.context.currentTime);
+                    console.log ("arrived off message: when / now", when, now);
+                    if (when < now) {
+                        console.log ("MORNINGSTAR: ******** OUT OF TIME OFF MESSAGE");
+                    }
                     this.MSS.noteOffDeferred(when);
                 }
             }

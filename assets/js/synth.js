@@ -30,41 +30,47 @@
             return (Math.exp(2 * arg) - 1) / (Math.exp(2 * arg) + 1);
         };
 
-        this.synth.handleEvent = function (event) {
-            console.log ("Handling event", event);
-            // Apply the scheduled event.
-            switch (event.type) {
-                case "note-on":
-                console.log ("note-on");
-                    if(this.noteson === 0) {
-                        this.freq = this.tfreq = event.tfreq;
-                        this.amp = event.amp;
-                        this.vel = event.vel;
-                        this.env = event.env;
-                        this.cdelay = event.cdelay;
-                    }
+        this.synth.handleEvent = function (ea) {
+            console.log ("Handling event", ea);
+            var len = ea.length;
+            for (var evIndex = 0; evIndex < len; evIndex +=1 ) {
+                var event = ea[evIndex];
+                // Apply the scheduled event.
+                switch (event.type) {
+                    case "note-on":
+                    console.log ("applying note-on");
+                        if(this.noteson === 0) {
+                            this.freq = this.tfreq = event.tfreq;
+                            this.amp = event.amp;
+                            this.vel = event.vel;
+                            this.env = event.env;
+                            this.cdelay = event.cdelay;
+                        }
 
-                    else {
-                        this.tfreq = event.tfreq;
-                    }
+                        else {
+                            this.tfreq = event.tfreq;
+                        }
 
-                    this.noteson += 1;
-                    break;
+                        this.noteson += 1;
+                        break;
 
-                case "note-off":
-                console.log ("note-off");
-                    this.noteson -= 1;
-                    if (this.noteson < 0) {
-                        this.noteson = 0;
-                    }
-                    break;
+                    case "note-off":
+                    console.log ("applying note-off");
+                        this.noteson -= 1;
+                        if (this.noteson < 0) {
+                            this.noteson = 0;
+                        }
+                        break;
+                }
             }
             
         };
 
         this.synth.consumeEvent = function (now) {
             var ret = this.events[now];
-            delete this.events[now];
+            if (ret) {
+                delete this.events[now];
+            }
             return ret;
         };
 
@@ -223,6 +229,15 @@
             }
         };
 
+        this.scheduleDeferredEvent = function (event, sampleWhen) {
+            if (!this.synth.events[sampleWhen]) {
+                this.synth.events[sampleWhen] = [event];
+            }
+            else {
+                this.synth.events[sampleWhen].push(event);
+            }
+        };
+
         this.noteOnDeferred = function (noteNum, velocity, when) {
             
             var event = {
@@ -235,8 +250,9 @@
             };
 
             var sampleWhen = Math.round(when * this.synth.sampleRate);
-            this.synth.events[sampleWhen] = event;
 
+            this.scheduleDeferredEvent (event, sampleWhen);
+            
             console.log ("Scheduled on event at", sampleWhen, this.synth.events);
         };
 
@@ -247,7 +263,8 @@
             };
 
             var sampleWhen = Math.round(when * this.synth.sampleRate);
-            this.synth.events[sampleWhen] = event;
+
+            this.scheduleDeferredEvent (event, sampleWhen);
 
             console.log ("Scheduled off event at", sampleWhen, this.synth.events);
 
