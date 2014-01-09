@@ -7,7 +7,7 @@ define(['require',
         osc: false,
         audioIn: 0,
         audioOut: 1,
-        version: '0.0.1-alpha1',
+        version: '0.0.2',
         ui: {
             type: 'canvas',
             width: 657,
@@ -87,10 +87,6 @@ define(['require',
         /* KEYS */
         this.viewWidth = args.canvas.width;
         this.viewHeight = args.canvas.height;
-        
-        var keyCallback = function (slot, value, element) {
-            this.ui.refresh();
-        }.bind(this);
         
         var keyCallback = function (slot, value, element) {
             

@@ -1,6 +1,6 @@
 (function (window) {
 
-    function MorningStarSynth() { 
+    function MorningStarSynth() {
 
         this.synth = {
             phase : 0,
@@ -24,13 +24,25 @@
             /* unsigned int */ portamento : 64,
         };
 
+        this.synth.events = {};
+
         this.synth.tanh = function (arg) {
             return (Math.exp(2 * arg) - 1) / (Math.exp(2 * arg) + 1);
-        }
+        };
 
-        this.synth.process = function (data) {
+        this.synth.scheduleEvent = function (event, when) {
+            this.events[when] = event;
+        };
 
-        var /*int*/ i;
+        this.synth.consumeEvent = function (now) {
+            var ret = this.events[now];
+            delete this.events[now];
+            return ret;
+        };
+
+        this.synth.process = function (data, time) {
+
+        var i;
 
         // Upmix to stereo if given two channels (array of arrays). Could be implemented
         // more elegantly.
@@ -38,6 +50,15 @@
         if (len == 2) len = data[0].length;
 
             if (this.bypass === false) {
+
+                console.log ("***time now is", time);
+                //var event = this.consumeEvent(time);
+
+
+                if (event) {
+                    /* TODO HANDLE EVENT */
+                }
+
                 for( i = 0; i < len; i+=1) {
                     if(this.cdelay <= 0) {
 
@@ -90,12 +111,12 @@
                     
                     // Mono if given only one channel (array)
                     else {
-                        data[i] = curr_sample; 
+                        data[i] = curr_sample;
                     }
                     
                 }
             }
-        }
+        };
 
         this.synth.init = function (sampleRate) {
             this.sampleRate = sampleRate;
@@ -118,7 +139,7 @@
             this.volume = 100;
             this.portamento = 64;
             this.bypass = false;
-        }
+        };
 
         this.getProcess = function () {
             var that = this;
@@ -127,10 +148,10 @@
                 var outputArray = [];
                 outputArray[0] = event.outputBuffer.getChannelData(0);
                 outputArray[1] = event.outputBuffer.getChannelData(1);
-                that.synth.process (outputArray);
-            }
+                that.synth.process (outputArray, event.playBackTime);
+            };
             return fn;
-        }
+        };
 
         this.init = function (context, destination) {
          
@@ -145,7 +166,7 @@
             this.source.onaudioprocess = this.getProcess();
 
             this.gainNode = this.context.createGainNode();
-        	this.source.connect(this.gainNode);
+            this.source.connect(this.gainNode);
             this.gainNode.connect(destination);
 
             
@@ -165,14 +186,14 @@
                 this.synth.tfreq = 440.0 * Math.pow (2, (noteNum) / 12);
             }
             this.synth.noteson += 1;
-        }
+        };
 
         this.noteOff = function (noteNum) {
             this.synth.noteson -= 1;
             if (this.synth.noteson < 0) {
                 this.synth.noteson = 0;
             }
-        }
+        };
 
         // Setters
 
