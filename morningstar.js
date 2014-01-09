@@ -251,7 +251,7 @@ define(['require',
         var onMIDIMessage = function (message, when) {
             if (message.type === 'noteon') {
                 if (!when) {
-                    this.MSS.noteOn(message.pitch, message.velocity);
+                    this.MSS.noteOn(message.pitch - 33, message.velocity);
                 }
                 else {
                     var now = this.context.currentTime;
@@ -259,7 +259,7 @@ define(['require',
                     if (when < now) {
                         console.log ("MORNINGSTAR: ******** OUT OF TIME ON MESSAGE");
                     }
-                    this.MSS.noteOnDeferred(message.pitch, message.velocity, when);
+                    this.MSS.noteOnDeferred(message.pitch - 33, message.velocity, when);
                 }
             }
             if (message.type === 'noteoff') {
