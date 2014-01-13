@@ -31,14 +31,12 @@
         };
 
         this.synth.handleEvent = function (ea) {
-            console.log ("Handling event", ea);
             var len = ea.length;
             for (var evIndex = 0; evIndex < len; evIndex +=1 ) {
                 var event = ea[evIndex];
                 // Apply the scheduled event.
                 switch (event.type) {
                     case "note-on":
-                    console.log ("applying note-on");
                         if(this.noteson === 0) {
                             this.freq = this.tfreq = event.tfreq;
                             this.amp = event.amp;
@@ -55,7 +53,6 @@
                         break;
 
                     case "note-off":
-                    console.log ("applying note-off");
                         this.noteson -= 1;
                         if (this.noteson < 0) {
                             this.noteson = 0;
@@ -82,6 +79,7 @@
             var ret = this.events[now];
             if (ret) {
                 delete this.events[now];
+                //console.log ("afer consume", this.events);
             }
             return ret;
         };
@@ -219,7 +217,6 @@
         };
 
         this.noteOn = function (noteNum, velocity) {
-            console.log("note received is ", noteNum);
             if(this.synth.noteson === 0) {
                 this.synth.freq = this.synth.tfreq = 440 * Math.pow(2, (noteNum) / 12);
                 this.synth.amp = 1;
@@ -264,8 +261,6 @@
             var sampleWhen = Math.round(when * this.synth.sampleRate);
 
             this.scheduleDeferredEvent (event, sampleWhen);
-            
-            console.log ("Scheduled on event at", sampleWhen, this.synth.events);
         };
 
         this.noteOffDeferred = function (when) {
@@ -277,9 +272,6 @@
             var sampleWhen = Math.round(when * this.synth.sampleRate);
 
             this.scheduleDeferredEvent (event, sampleWhen);
-
-            console.log ("Scheduled off event at", sampleWhen, this.synth.events);
-
         };
 
         // Setters

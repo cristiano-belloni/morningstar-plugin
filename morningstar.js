@@ -250,7 +250,7 @@ define(['require',
 
         var onMIDIMessage = function (message, when) {
             var now = this.context.currentTime;
-            console.log ("arrived MIDI message: type / when / now", message.type, when, now);
+            //console.log ("arrived MIDI message: type / when / now", message.type, when, now);
             if (when && (when < now)) {
                 console.log ("MORNINGSTAR: ******** OUT OF TIME OFF MESSAGE");
             }
