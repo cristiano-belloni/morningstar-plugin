@@ -21,7 +21,7 @@
             /* unsigned int */ envmod : 80,
             /* unsigned int */ resonance : 100,
             /* unsigned int */ volume : 100,
-            /* unsigned int */ portamento : 64,
+            /* unsigned int */ portamento : 64
         };
 
         this.synth.events = {};
@@ -60,6 +60,18 @@
                         if (this.noteson < 0) {
                             this.noteson = 0;
                         }
+                        break;
+                    case "cutoff":
+                        this.cutoff = event.cutoff;
+                        break;
+                    case "resonance":
+                        this.resonance = event.resonance;
+                        break;
+                    case "release":
+                        this.release = event.release;
+                        break;
+                    case "envelope":
+                        this.envmod = event.envmod;
                         break;
                 }
             }
@@ -276,8 +288,26 @@
             this.synth.cutoff = cutoffValue;
         };
 
+        this.setCutoffDeferred = function (cutoffValue, when) {
+            var sampleWhen = Math.round(when * this.synth.sampleRate);
+            var event = {
+                type: "cutoff",
+                cutoff: cutoffValue
+            };
+            this.scheduleDeferredEvent (event, sampleWhen);
+        };
+
         this.setResonance = function (resValue) {
             this.synth.resonance = resValue;
+        };
+
+        this.setResonanceDeferred = function (resValue, when) {
+            var sampleWhen = Math.round(when * this.synth.sampleRate);
+            var event = {
+                type: "resonance",
+                resonance: resValue
+            };
+            this.scheduleDeferredEvent (event, sampleWhen);
         };
 
         this.setPortamento = function (portValue) {
@@ -288,8 +318,26 @@
             this.synth.release = relValue;
         };
 
+        this.setReleaseDeferred = function (relValue, when) {
+            var sampleWhen = Math.round(when * this.synth.sampleRate);
+            var event = {
+                type: "release",
+                release: relValue
+            };
+            this.scheduleDeferredEvent (event, sampleWhen);
+        };
+
         this.setEnvelope = function (envValue) {
             this.synth.envmod = envValue;
+        };
+
+        this.setEnvelopeDeferred = function (envValue, when) {
+            var sampleWhen = Math.round(when * this.synth.sampleRate);
+            var event = {
+                type: "envelope",
+                envmod: envValue
+            };
+            this.scheduleDeferredEvent (event, sampleWhen);
         };
 
         this.setVolume = function (volValue) {

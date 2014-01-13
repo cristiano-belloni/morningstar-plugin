@@ -249,16 +249,16 @@ define(['require',
         args.hostInterface.setSaveState (saveState.bind (this));
 
         var onMIDIMessage = function (message, when) {
+            var now = this.context.currentTime;
+            console.log ("arrived MIDI message: type / when / now", message.type, when, now);
+            if (when && (when < now)) {
+                console.log ("MORNINGSTAR: ******** OUT OF TIME OFF MESSAGE");
+            }
             if (message.type === 'noteon') {
                 if (!when) {
                     this.MSS.noteOn(message.pitch - 93, message.velocity);
                 }
                 else {
-                    var now = this.context.currentTime;
-                    console.log ("arrived on message: when / now", when, now);
-                    if (when < now) {
-                        console.log ("MORNINGSTAR: ******** OUT OF TIME ON MESSAGE");
-                    }
                     this.MSS.noteOnDeferred(message.pitch - 93, message.velocity, when);
                 }
             }
@@ -267,11 +267,46 @@ define(['require',
                     this.MSS.noteOff();
                 }
                 else {
-                    console.log ("arrived off message: when / now", when, now);
-                    if (when < now) {
-                        console.log ("MORNINGSTAR: ******** OUT OF TIME OFF MESSAGE");
-                    }
                     this.MSS.noteOffDeferred(when);
+                }
+            }
+            if (message.type === 'controlchange') {
+                /* http://tweakheadz.com/midi-controllers/ */
+                if (message.control === 71) {
+                    // Resonance
+                    if (when) {
+                        this.MSS.setResonanceDeferred(message.value, when);
+                    }
+                    else {
+                        this.MSS.setResonance(message.value);
+                    }
+                }
+                else if (message.control === 72) {
+                    // Release
+                    if (when) {
+                        this.MSS.setCutoffDeferred(message.value, when);
+                    }
+                    else {
+                        this.MSS.setCutoff(message.value);
+                    }
+                }
+                else if (message.control === 73) {
+                    // Envelope (using Attack)
+                    if (when) {
+                        this.MSS.setEnvelopeDeferred(message.value, when);
+                    }
+                    else {
+                        this.MSS.setEnvelope(message.value);
+                    }
+                }
+                else if (message.control === 74) {
+                    // Cutoff
+                    if (when) {
+                        this.MSS.setCutoffDeferred(message.value, when);
+                    }
+                    else {
+                        this.MSS.setCutoff(message.value);
+                    }
                 }
             }
         };
