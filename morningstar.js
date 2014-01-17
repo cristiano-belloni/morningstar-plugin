@@ -4,6 +4,7 @@ define(['require',
     /* This gets returned to the host as soon as the plugin is loaded */
     var pluginConf = {
         name: "MorningStar",
+        hyaId: 'MorningStarSynth',
         osc: false,
         audioIn: 0,
         audioOut: 1,
