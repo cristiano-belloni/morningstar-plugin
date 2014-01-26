@@ -8,6 +8,7 @@ define(['require',
         audioIn: 0,
         audioOut: 1,
         version: '0.0.2',
+	hyaId: 'MorningStar',
         ui: {
             type: 'canvas',
             width: 657,
