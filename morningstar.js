@@ -5,7 +5,6 @@ define(['require',
     var pluginConf = {
         name: "MorningStar",
         hyaId: 'MorningStarSynth',
-        osc: false,
         audioIn: 0,
         audioOut: 1,
         version: '0.0.2',
@@ -32,7 +31,7 @@ define(['require',
 
         if (args.initialState && args.initialState.data) {
             /* Load data */
-            this.pluginState = args.initialState.data;  
+            this.pluginState = args.initialState.data;
         }
         else {
             /* Use default data */
@@ -132,7 +131,7 @@ define(['require',
         
         for (var i = 0; i < 21; i+=1) {
             whiteKeyArgs.top = 300;
-            whiteKeyArgs.left = 14 + i * 30;    
+            whiteKeyArgs.left = 14 + i * 30;
             whiteKeyArgs.ID = "wk_" + i;
             this.ui.addElement(new K2.Button(whiteKeyArgs), {zIndex: 1});
         }
@@ -151,7 +150,7 @@ define(['require',
         
             for (var i = 0; i < bkArray.length; i+=1) {
                 blackKeyArgs.top = 299;
-                blackKeyArgs.left = bkArray[i];    
+                blackKeyArgs.left = bkArray[i];
                 blackKeyArgs.ID = "bk_" + i;
                 this.ui.addElement(new K2.Button(blackKeyArgs), {zIndex: 10});
             }
