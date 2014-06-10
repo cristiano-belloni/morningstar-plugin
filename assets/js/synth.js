@@ -209,7 +209,7 @@
             this.source = this.context.createJavaScriptNode(this.nSamples);
             this.source.onaudioprocess = this.getProcess();
 
-            this.gainNode = this.context.createGainNode();
+            this.gainNode = this.context.createGain();
             this.source.connect(this.gainNode);
             this.gainNode.connect(destination);
 
