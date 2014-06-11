@@ -206,7 +206,7 @@
 
             this.synth.init(this.context.sampleRate);
 
-            this.source = this.context.createJavaScriptNode(this.nSamples);
+            this.source = this.context.createScriptProcessor(this.nSamples);
             this.source.onaudioprocess = this.getProcess();
 
             this.gainNode = this.context.createGain();
